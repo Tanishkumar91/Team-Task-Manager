@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { 

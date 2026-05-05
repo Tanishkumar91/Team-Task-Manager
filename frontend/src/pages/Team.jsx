@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import { motion } from 'framer-motion';
 import { Mail, Shield, User, Loader2, Search } from 'lucide-react';
 

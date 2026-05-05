@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Bell, Search, ChevronDown, CheckCircle2, Clock, UserPlus } from 'lucide-react';
 import { setSearchQuery } from '../store/uiSlice';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
@@ -34,7 +35,7 @@ const Navbar = () => {
   const markAllRead = async () => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await axios.get('http://localhost:5000/api/notifications/read-all', config);
+      await axios.patch(`${API_BASE_URL}/notifications/read-all`, {}, config);
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Error marking all as read', error);
