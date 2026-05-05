@@ -3,13 +3,13 @@ const Project = require('../models/Project');
 const Notification = require('../models/Notification');
 
 exports.createTask = async (req, res) => {
-    const { title, description, projectId, assignedTo, priority, dueDate } = req.body;
+    const { title, description, project, assignedTo, priority, dueDate } = req.body;
     try {
-        const project = await Project.findById(projectId);
-        if (!project) return res.status(404).json({ message: 'Project not found' });
+        const foundProject = await Project.findById(project);
+        if (!foundProject) return res.status(404).json({ message: 'Project not found' });
 
         const task = await Task.create({
-            title, description, project: projectId, assignedTo, priority, dueDate
+            title, description, project, assignedTo, priority, dueDate
         });
 
         // Notify Assignee
