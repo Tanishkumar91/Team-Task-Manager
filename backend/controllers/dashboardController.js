@@ -8,7 +8,7 @@ exports.getDashboardStats = async (req, res) => {
 
         const tasks = await Task.find({ project: { $in: projectIds } });
 
-        const myTasks = tasks.filter(t => t.assignedTo.toString() === req.user._id.toString());
+        const myTasks = tasks.filter(t => t.assignedTo && t.assignedTo.toString() === req.user._id.toString());
 
         const stats = {
             // Global Stats (for Admin)
