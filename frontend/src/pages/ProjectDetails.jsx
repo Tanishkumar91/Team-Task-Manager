@@ -17,6 +17,7 @@ const ProjectDetails = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { tasks, isLoading } = useSelector((state) => state.tasks);
+  const isAdmin = user?.role === 'Admin';
   
   const [project, setProject] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
