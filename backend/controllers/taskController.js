@@ -19,7 +19,7 @@ exports.createTask = async (req, res) => {
                 sender: req.user._id,
                 message: `New Task: ${title} assigned to you.`,
                 type: 'task_assigned',
-                relatedProject: projectId,
+                relatedProject: project,
                 relatedTask: task._id
             });
         }
