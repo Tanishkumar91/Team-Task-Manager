@@ -97,13 +97,15 @@ const ProjectDetails = () => {
             <UserPlus size={18} />
             Invite
           </button>
-          <button 
-            onClick={() => setIsTaskModalOpen(true)}
-            className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl"
-          >
-            <Plus size={18} />
-            New Task
-          </button>
+          {isAdmin && (
+            <button 
+              onClick={() => setIsTaskModalOpen(true)}
+              className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl"
+            >
+              <Plus size={18} />
+              New Task
+            </button>
+          )}
         </div>
       </div>
 
@@ -170,7 +172,9 @@ const ProjectDetails = () => {
               <div className="col-span-full py-20 text-center glass rounded-2xl border-dashed border-2 border-dark-border">
                 <Layout className="mx-auto text-slate-700 mb-4" size={48} />
                 <p className="text-slate-500">No tasks in this project yet.</p>
-                <button onClick={() => setIsTaskModalOpen(true)} className="text-primary-400 font-bold mt-2 hover:text-primary-300">Create the first one</button>
+                {isAdmin && (
+                  <button onClick={() => setIsTaskModalOpen(true)} className="text-primary-400 font-bold mt-2 hover:text-primary-300">Create the first one</button>
+                )}
               </div>
             )}
           </div>
