@@ -38,7 +38,7 @@ const ProjectDetails = () => {
 
     if (user) {
       fetchProjectDetails();
-      dispatch(getTasks());
+      dispatch(getTasks(id));
     }
   }, [id, user, dispatch]);
 
