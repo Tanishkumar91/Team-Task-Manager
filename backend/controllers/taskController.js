@@ -24,7 +24,8 @@ exports.createTask = async (req, res) => {
             });
         }
 
-        res.status(201).json(task);
+        const populatedTask = await Task.findById(task._id).populate('assignedTo', 'name email');
+        res.status(201).json(populatedTask);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
