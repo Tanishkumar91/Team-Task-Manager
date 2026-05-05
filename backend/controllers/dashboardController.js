@@ -25,7 +25,8 @@ exports.getDashboardStats = async (req, res) => {
                 myPendingTasks: myTasks.filter(t => t.status !== 'Done').length,
                 myOverdueTasks: myTasks.filter(t => t.status !== 'Done' && t.dueDate && new Date(t.dueDate) < new Date()).length,
             },
-            recentTasks: tasks.sort((a, b) => b.createdAt - a.createdAt).slice(0, 5)
+            recentTasks: tasks.sort((a, b) => b.createdAt - a.createdAt).slice(0, 5),
+            myTasks: myTasks.sort((a, b) => b.createdAt - a.createdAt).slice(0, 10)
         };
 
         res.json(stats);

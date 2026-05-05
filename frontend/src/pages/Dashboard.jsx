@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
+import { updateTaskStatus } from '../store/taskSlice';
 import { 
   CheckCircle2, Clock, AlertCircle, BarChart3, 
-  ArrowUpRight, TrendingUp, Calendar, Briefcase, Layout
+  ArrowUpRight, TrendingUp, Calendar, Briefcase, Layout, User
 } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, color, delay }) => (
@@ -31,26 +32,34 @@ const StatCard = ({ title, value, icon: Icon, color, delay }) => (
 );
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
   const [stats, setStats] = useState({
     global: { totalTasks: 0, completedTasks: 0, pendingTasks: 0, overdueTasks: 0 },
     personal: { myTasksCount: 0, myCompletedTasks: 0, myPendingTasks: 0, myOverdueTasks: 0 },
-    recentTasks: []
+    recentTasks: [],
+    myTasks: []
   });
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.role === 'Admin';
 
+  const fetchStats = async () => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const { data } = await axios.get(`${API_BASE_URL}/dashboard`, config);
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching dashboard stats', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const { data } = await axios.get(`${API_BASE_URL}/dashboard`, config);
-        setStats(data);
-      } catch (error) {
-        console.error('Error fetching dashboard stats', error);
-      }
-    };
     if (user) fetchStats();
   }, [user]);
+
+  const handleStatusUpdate = async (id, status) => {
+    await dispatch(updateTaskStatus({ id, status }));
+    fetchStats(); // Refresh dashboard stats
+  };
 
   const cards = isAdmin ? [
     { title: 'Total Tasks', value: stats.global.totalTasks, icon: Layout, color: 'bg-primary-500', delay: 0.1 },
@@ -68,18 +77,20 @@ const Dashboard = () => {
     ? (stats.global.totalTasks > 0 ? Math.round((stats.global.completedTasks / stats.global.totalTasks) * 100) : 0)
     : (stats.personal.myTasksCount > 0 ? Math.round((stats.personal.myCompletedTasks / stats.personal.myTasksCount) * 100) : 0);
 
+  const displayTasks = isAdmin ? stats.recentTasks : stats.myTasks;
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-white">{isAdmin ? 'Admin Overview' : 'Dashboard Overview'}</h1>
-          <p className="text-slate-400 mt-1">Welcome back, {user?.name}! Here's what's happening across your projects.</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">{isAdmin ? 'Admin Overview' : 'Workspace Dashboard'}</h1>
+          <p className="text-slate-400 mt-1">Welcome back, {user?.name}! Here's what's on your plate today.</p>
         </div>
         <div className="flex gap-3">
-          <button className="bg-dark-surface border border-dark-border px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-slate-800 transition-colors">
-            <Calendar size={16} />
+          <div className="bg-slate-800/50 border border-white/5 px-4 py-2.5 rounded-xl flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-widest">
+            <Calendar size={14} className="text-primary-400" />
             May 2026
-          </button>
+          </div>
         </div>
       </div>
 
@@ -88,61 +99,98 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 glass p-6 rounded-2xl min-h-[400px]">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white">Recent Task Updates</h2>
+        <div className="lg:col-span-2 glass p-6 rounded-[2rem] border border-dark-border">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <span className="w-2 h-8 bg-primary-500 rounded-full"></span>
+              {isAdmin ? 'Recent Activity' : 'Your Active Tasks'}
+            </h2>
+            <button className="text-xs font-bold text-primary-400 hover:text-primary-300 uppercase tracking-widest">View All</button>
           </div>
           
-          <div className="space-y-4">
-            {(stats.recentTasks || []).length > 0 ? (
-              (stats.recentTasks || []).map((task) => (
-                <div key={task._id} className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-800/30 transition-all border border-transparent hover:border-dark-border">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+          <div className="space-y-3">
+            {displayTasks.length > 0 ? (
+              displayTasks.map((task) => (
+                <div key={task._id} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-primary-500/30 transition-all group">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
                     task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-primary-500/10 text-primary-400'
                   }`}>
-                    {task.status === 'Done' ? <CheckCircle2 size={20} /> : <Clock size={20} />}
+                    {task.status === 'Done' ? <CheckCircle2 size={24} /> : <Clock size={24} />}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-200">{task.title}</p>
-                    <p className="text-xs text-slate-500">{task.status} • {task.priority} Priority</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{task.title}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter flex items-center gap-1">
+                        <AlertCircle size={10} />
+                        {task.priority} Priority
+                      </span>
+                    </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                  }`}>
-                    {task.status}
+                  
+                  <div className="flex items-center gap-4">
+                    {!isAdmin && (
+                      <select 
+                        value={task.status}
+                        onChange={(e) => handleStatusUpdate(task._id, e.target.value)}
+                        className="bg-slate-800 border-none text-xs font-bold text-slate-300 rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-primary-500 outline-none"
+                      >
+                        <option value="To-Do">To-Do</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                      </select>
+                    )}
+                    {isAdmin && (
+                       <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                        task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                      }`}>
+                        {task.status}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-slate-500">
-                <BarChart3 size={48} className="mb-4 opacity-20" />
-                <p>No activity yet. Create a project to get started!</p>
+              <div className="flex flex-col items-center justify-center h-64 text-slate-600 bg-slate-900/20 rounded-2xl border border-dashed border-dark-border">
+                <Layout size={48} className="mb-4 opacity-10" />
+                <p className="text-sm font-medium">No tasks assigned to you yet.</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="glass p-6 rounded-2xl h-full">
-          <h2 className="text-xl font-bold text-white mb-6">{isAdmin ? 'Organization Progress' : 'Personal Progress'}</h2>
-          <div className="space-y-6">
+        <div className="glass p-8 rounded-[2rem] border border-dark-border relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+             <BarChart3 size={120} />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-8">{isAdmin ? 'Team Velocity' : 'Your Efficiency'}</h2>
+          <div className="space-y-8">
              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-400">{isAdmin ? 'Total Completion Rate' : 'Your Completion Rate'}</span>
-                  <span className="text-white">{completionRate}%</span>
+                <div className="flex justify-between items-end mb-4">
+                   <div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Completion Rate</p>
+                      <h4 className="text-3xl font-black text-white">{completionRate}%</h4>
+                   </div>
+                   <div className="text-right">
+                      <p className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        <TrendingUp size={12} />
+                        Good Pace
+                      </p>
+                   </div>
                 </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-primary-500 h-full rounded-full shadow-[0_0_10px_rgba(139,92,246,0.5)] transition-all duration-1000"
-                    style={{ width: `${completionRate}%` }}
-                  ></div>
+                <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden p-0.5 border border-white/5">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionRate}%` }}
+                    className="bg-gradient-to-r from-primary-600 to-indigo-500 h-full rounded-full shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                  ></motion.div>
                 </div>
              </div>
              
-             <div className="pt-4 mt-6 border-t border-dark-border">
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {isAdmin 
-                    ? "This progress bar reflects the overall completion of all tasks across all projects in the organization."
-                    : "This progress bar reflects the ratio of completed tasks specifically assigned to you across all projects."}
+             <div className="p-4 rounded-2xl bg-primary-500/5 border border-primary-500/10">
+                <p className="text-xs text-slate-400 leading-relaxed italic">
+                  " {isAdmin 
+                    ? "Great work! The organization is maintaining a healthy velocity across all active projects."
+                    : "You're making steady progress. Keep ticking off those tasks to maintain your streak!"} "
                 </p>
              </div>
           </div>
