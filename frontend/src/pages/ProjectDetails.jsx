@@ -22,7 +22,7 @@ const ProjectDetails = () => {
   const [project, setProject] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'Medium', dueDate: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'Medium', dueDate: '', assignedTo: '' });
   const [memberEmail, setMemberEmail] = useState('');
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const ProjectDetails = () => {
     e.preventDefault();
     dispatch(createTask({ ...newTask, project: id }));
     setIsTaskModalOpen(false);
-    setNewTask({ title: '', description: '', priority: 'Medium', dueDate: '' });
+    setNewTask({ title: '', description: '', priority: 'Medium', dueDate: '', assignedTo: '' });
   };
 
   const handleAddMember = async (e) => {
@@ -187,16 +187,23 @@ const ProjectDetails = () => {
                <div>
                   <div className="flex justify-between text-xs mb-2">
                     <span className="text-slate-500">Task Completion</span>
-                    <span className="text-white">64%</span>
+                    <span className="text-white">
+                       {projectTasks.length > 0 
+                         ? Math.round((projectTasks.filter(t => t.status === 'Done').length / projectTasks.length) * 100) 
+                         : 0}%
+                    </span>
                   </div>
                   <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-primary-500 h-full w-[64%] rounded-full shadow-[0_0_8px_rgba(139,92,246,0.3)]"></div>
+                    <div 
+                      className="bg-primary-500 h-full rounded-full shadow-[0_0_8px_rgba(139,92,246,0.3)]"
+                      style={{ width: `${projectTasks.length > 0 ? (projectTasks.filter(t => t.status === 'Done').length / projectTasks.length) * 100 : 0}%` }}
+                    ></div>
                   </div>
                </div>
                <div className="grid grid-cols-2 gap-4 pt-4">
                   <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5">
-                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Due Date</p>
-                    <p className="text-xs text-white font-medium">May 28, 2026</p>
+                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Status</p>
+                    <p className="text-xs text-white font-medium">{project.status}</p>
                   </div>
                   <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5">
                     <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Team Size</p>
@@ -231,7 +238,7 @@ const ProjectDetails = () => {
         </div>
       </div>
 
-      {/* Modals - Simplified implementation */}
+      {/* Modals */}
       <AnimatePresence>
         {isTaskModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -241,6 +248,23 @@ const ProjectDetails = () => {
               <form onSubmit={handleCreateTask} className="space-y-4">
                 <input type="text" placeholder="Task Title" className="input-field w-full" required value={newTask.title} onChange={(e) => setNewTask({...newTask, title: e.target.value})} />
                 <textarea placeholder="Description" className="input-field w-full h-24 resize-none" value={newTask.description} onChange={(e) => setNewTask({...newTask, description: e.target.value})} />
+                
+                {/* Assignee Selection */}
+                <div className="space-y-2">
+                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Assign To Member</label>
+                   <select 
+                     className="input-field w-full" 
+                     value={newTask.assignedTo} 
+                     onChange={(e) => setNewTask({...newTask, assignedTo: e.target.value})}
+                     required
+                   >
+                     <option value="">Select a member</option>
+                     {project.members?.map(member => (
+                       <option key={member._id} value={member._id}>{member.name}</option>
+                     ))}
+                   </select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <select className="input-field w-full" value={newTask.priority} onChange={(e) => setNewTask({...newTask, priority: e.target.value})}>
                     <option value="Low">Low Priority</option>
