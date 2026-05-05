@@ -18,9 +18,9 @@ const Sidebar = () => {
       <div className="p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/40">
-            <span className="text-white font-bold text-xl">E</span>
+            <span className="text-white font-bold text-xl">W</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">Ethera</span>
+          <span className="text-xl font-bold tracking-tight text-white">Workspace</span>
         </div>
 
         <nav className="space-y-2">
