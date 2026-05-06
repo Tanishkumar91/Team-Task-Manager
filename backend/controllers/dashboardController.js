@@ -6,7 +6,8 @@ exports.getDashboardStats = async (req, res) => {
         const userProjects = await Project.find({ members: { $in: [req.user._id] } });
         const projectIds = userProjects.map(p => p._id);
 
-        const tasks = await Task.find({ project: { $in: projectIds } });
+        const tasks = await Task.find({ project: { $in: projectIds } })
+            .populate('project', 'title');
 
         const myTasks = tasks.filter(t => t.assignedTo && t.assignedTo.toString() === req.user._id.toString());
 

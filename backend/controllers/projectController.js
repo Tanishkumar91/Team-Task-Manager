@@ -1,6 +1,7 @@
 const Project = require('../models/Project');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Task = require('../models/Task');
 
 exports.createProject = async (req, res) => {
     const { title, description } = req.body;
@@ -23,8 +24,19 @@ exports.getProjects = async (req, res) => {
             members: { $in: [req.user._id] }
         })
         .populate('createdBy', 'name email')
-        .populate('members', 'name email');
-        res.json(projects);
+        .populate('members', 'name email')
+        .lean();
+
+        const projectsWithTaskCounts = await Promise.all(projects.map(async (project) => {
+            const taskCount = await Task.countDocuments({ 
+                project: project._id, 
+                assignedTo: req.user._id,
+                status: { $ne: 'Done' }
+            });
+            return { ...project, myActiveTasksCount: taskCount };
+        }));
+
+        res.json(projectsWithTaskCounts);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

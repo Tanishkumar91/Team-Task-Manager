@@ -76,10 +76,10 @@ const ProjectDetails = () => {
           <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
             <Link to="/projects" className="hover:text-primary-400 transition-colors">Projects</Link>
             <ChevronRight size={14} />
-            <span className="text-slate-300 font-medium">{project.name}</span>
+            <span className="text-slate-300 font-medium">{project.title}</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
-            {project.name}
+            {project.title}
             <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest ${
               project.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'
             }`}>

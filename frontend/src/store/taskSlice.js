@@ -24,10 +24,13 @@ export const createTask = createAsyncThunk('tasks/create', async (taskData, thun
   }
 });
 
-export const getTasks = createAsyncThunk('tasks/getAll', async (_, thunkAPI) => {
+export const getTasks = createAsyncThunk('tasks/getAll', async (projectId, thunkAPI) => {
   try {
     const token = thunkAPI.getState().auth.user.token;
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const config = { 
+      headers: { Authorization: `Bearer ${token}` },
+      params: { projectId }
+    };
     const response = await axios.get(API_URL, config);
     return response.data;
   } catch (error) {
@@ -40,7 +43,7 @@ export const updateTaskStatus = createAsyncThunk('tasks/updateStatus', async ({ 
   try {
     const token = thunkAPI.getState().auth.user.token;
     const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.patch(`${API_URL}/${id}/status`, { status }, config);
+    const response = await axios.put(`${API_URL}/${id}`, { status }, config);
     return response.data;
   } catch (error) {
     const message = error.response?.data?.message || error.message || error.toString();
