@@ -1,8 +1,7 @@
 # 🚀 Workspace - Team Task Manager
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=vercel)](https://team-taskmanage.up.railway.app/)
-[![Node.js](https://img.shields.io/badge/Backend-Node.js-blue?style=for-the-badge&logo=node.js)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
+
 
 > **"Manage projects. Sync your team."**
 > A modern, simple, and powerful project management platform designed for teams to organize tasks, track progress, and collaborate in real-time.
@@ -57,5 +56,3 @@
 ## 🌐 Live Demo
 Check out the live application here: [Workspace Live](https://team-taskmanage.up.railway.app/)
 
-## 📄 License
-© 2026 Workspace. Built for seamless team collaboration.
